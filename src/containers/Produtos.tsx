@@ -3,36 +3,30 @@ import Produto from '../components/Produto'
 
 import * as S from './styles'
 
-type Props = {
-  produtos: ProdutoType[]
-  favoritos: ProdutoType[]
-  adicionarAoCarrinho: (produto: ProdutoType) => void
-  favoritar: (produto: ProdutoType) => void
-}
+import { useSelector } from 'react-redux'
+import { RootReducer } from '../store'
+import { useGetProdutosQuery } from '../services/api'
 
-const ProdutosComponent = ({
-  produtos,
-  favoritos,
-  adicionarAoCarrinho,
-  favoritar
-}: Props) => {
+const ProdutosComponent = () => {
+  const favoritos = useSelector((state: RootReducer) => state.favorito.itens)
   const produtoEstaNosFavoritos = (produto: ProdutoType) => {
     const produtoId = produto.id
     const IdsDosFavoritos = favoritos.map((f) => f.id)
 
     return IdsDosFavoritos.includes(produtoId)
   }
-
+  const { data: produto, isLoading } = useGetProdutosQuery()
+  if (isLoading) {
+    return <h2>Carregando...</h2>
+  }
   return (
     <>
       <S.Produtos>
-        {produtos.map((produto) => (
+        {produto?.map((p) => (
           <Produto
-            estaNosFavoritos={produtoEstaNosFavoritos(produto)}
-            key={produto.id}
-            produto={produto}
-            favoritar={favoritar}
-            aoComprar={adicionarAoCarrinho}
+            produto={p}
+            estaNosFavoritos={produtoEstaNosFavoritos(p)}
+            key={p.id}
           />
         ))}
       </S.Produtos>
